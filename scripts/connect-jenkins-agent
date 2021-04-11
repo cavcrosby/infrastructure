@@ -12,7 +12,7 @@ export JENKINS_PASSWORD=
 export JENKINS_WORKINGDIR=
 #
 # NOTE: the agentops cfg file is to prevent jenkins credentials from being
-# exposed when running the agent executable using the credentails by 
+# exposed when running the agent executable using the credentials by 
 # viewing processes running on a system, for reference:
 # https://issues.jenkins.io/browse/JENKINS-18342
 # https://github.com/jenkinsci/remoting/blob/master/docs/inbound-agent.md#the--argument-annotation
