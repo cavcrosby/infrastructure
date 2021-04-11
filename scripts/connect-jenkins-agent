@@ -45,6 +45,6 @@ if [ -z "$(find "$PWD" -maxdepth 1 -name "$AGENT_JAR_FILENAME")" ]; then
 	fi
 fi
 
-java -jar "${AGENT_JAR_FILENAME}" @"${AGENTOPTS_CFG_PATH}"
+java -jar "${AGENT_JAR_FILENAME}" @"${AGENTOPTS_CFG_PATH}" &
 
 exit 0
