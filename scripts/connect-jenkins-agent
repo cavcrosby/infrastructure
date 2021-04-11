@@ -1,15 +1,14 @@
 #!/bin/bash
 #
-# Used to connect a host as an agent to Jenkins. Assumes
-# AGENTOPTS_CFG_PATH is filled out.
+# Used to connect a host as an agent to Jenkins.
 
 PROGRAM_NAME="$(basename "$0")"
 # these env vars are for the AGENTOPTS_CFG_PATH
-export JENKINS_MAIN_URL=
-export JENKINS_AGENT_NAME=
-export JENKINS_USERNAME=
-export JENKINS_PASSWORD=
-export JENKINS_WORKINGDIR=
+JENKINS_MAIN_URL=
+JENKINS_AGENT_NAME=
+JENKINS_USERNAME=
+JENKINS_PASSWORD=
+JENKINS_WORKINGDIR=
 #
 # NOTE: the agentops cfg file is to prevent jenkins credentials from being
 # exposed when running the agent executable using the credentials by 
@@ -18,6 +17,16 @@ export JENKINS_WORKINGDIR=
 # https://github.com/jenkinsci/remoting/blob/master/docs/inbound-agent.md#the--argument-annotation
 AGENTOPTS_CFG_PATH="../configs/agentopts.cfg"
 AGENT_JAR_FILENAME="agent.jar"
+
+# heredoc that generates the cfg file
+cat << _EOF_ > "$AGENTOPTS_CFG_PATH"
+-jnlpUrl
+${JENKINS_MAIN_URL}/computer/${JENKINS_AGENT_NAME}/jenkins-agent.jnlp
+-jnlpCredentials
+${JENKINS_USERNAME}:${JENKINS_PASSWORD}
+-workDir
+${JENKINS_WORKINGDIR}
+_EOF_
 
 if [ -z "$(which java)" ]; then
     echo "${PROGRAM_NAME}: java executable cannot be found on the PATH!"
