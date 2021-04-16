@@ -2,6 +2,18 @@
 #
 # Used to connect a host as an agent to Jenkins.
 
+getopts "g" opt
+
+case "$opt" in
+    # -g is for 'generate-agentopts-cfg'
+	# TODO(conner@conneracrosby.tech): usage str!
+    "g")    GENERATE_AGENTOPTS="true"
+            ;;
+    *)      GENERATE_AGENTOPTS=
+			;;
+esac
+
+set -e
 PROGRAM_NAME="$(basename "$0")"
 # these env vars are for the AGENTOPTS_CFG_PATH
 JENKINS_MAIN_URL=
@@ -18,7 +30,8 @@ JENKINS_WORKINGDIR=
 AGENTOPTS_CFG_PATH="../configs/agentopts.cfg"
 AGENT_JAR_FILENAME="agent.jar"
 
-# heredoc that generates the cfg file
+generate_agentopts_cfg() {
+    # heredoc that generates the cfg file
 cat << _EOF_ > "$AGENTOPTS_CFG_PATH"
 -jnlpUrl
 ${JENKINS_MAIN_URL}/computer/${JENKINS_AGENT_NAME}/jenkins-agent.jnlp
@@ -27,6 +40,14 @@ ${JENKINS_USERNAME}:${JENKINS_PASSWORD}
 -workDir
 ${JENKINS_WORKINGDIR}
 _EOF_
+return
+}
+
+if [ -n "$GENERATE_AGENTOPTS" ]; then
+    # exit based on return status
+    generate_agentopts_cfg
+    exit
+fi
 
 if [ -z "$(which java)" ]; then
     echo "${PROGRAM_NAME}: java executable cannot be found on the PATH!"
