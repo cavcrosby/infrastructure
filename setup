@@ -18,11 +18,10 @@ usage () {
 	cat << _EOF_
 Usage: $PROGRAM_NAME [-h] [-u]
 
-Description: Evaluates common env vars between cfg files and scripts.
-
 Each 'original' script/cfg file gets shifted name wise temporarily.
-To undo this change and to have all the original files back in 
-place, append the -u option.
+With the new replacement file being a copy but having its env vars
+evaluated based on the env vars read from '$ENV_FILENAME' (also the
+copy's filename is that of the original's filename).
 
 Options:
     -h	display usage str and exit

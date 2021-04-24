@@ -4,7 +4,6 @@
 
 set -e
 PROGRAM_NAME="$(basename "$0")"
-JENKINS_MAIN_URL=
 
 # NOTE: the agentops cfg file is to prevent jenkins credentials from being
 # exposed when running the agent executable using the credentials by 
