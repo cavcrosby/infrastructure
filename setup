@@ -4,14 +4,67 @@
 # scripts (excluding dotfiles). These common env vars 
 # are denoted by SUBST_VARS.
 
+#######################################
+# Usage string for the program.
+# Globals:
+#   PROGRAM_NAME
+# Outputs:
+#   - usage heredoc string to stdout
+# Returns:
+#   0 - cat success
+#   1 - cat error
+#######################################
+usage () {
+	cat << _EOF_
+Usage: $PROGRAM_NAME [-h] [-u]
+
+Description: Evaluates common env vars between cfg files and scripts.
+
+Each 'original' script/cfg file gets shifted name wise temporarily.
+To undo this change and to have all the original files back in 
+place, append the -u option.
+
+Options:
+    -h	display usage str and exit
+    -u	undo script/cfg file changes
+
+_EOF_
+	return
+}
+
 set -e
 PROGRAM_NAME=$(basename "$0")
 ENV_FILENAME=".env"
-TEMP_FILENAME="temp"
+# ORIG = ORIGINAL
+ORIG_PREFIX="_"
 # shellcheck disable=2016
 SUBST_VARS=(
     '${JENKINS_MAIN_URL}'
 )
+
+# NOTE: opt is unset incase it has been defined previously;
+# getops will place the next option (e.g. o, t) into name;
+unset opt
+while getopts "hu" opt; do
+	case "$opt" in
+	# -u is for 'undo'
+	"u")    UNDO="true"
+			;;
+	"h")	usage
+			exit 0
+			;;
+	":")    echo "${PROGRAM_NAME}: an argument is required for -- $OPTARG"
+			exit 1
+			;;
+    *)		# NOTE: using the program with no arguments will cause '?'
+			# to be inserted into $opt. However, I've found getopts seems to
+			# handle unknown options (at least those not found in the opt str).
+			# 'shellcheck' seems to say otherwise, and that a default case is needed.
+			usage
+			exit 1
+			;;
+    esac
+done
 
 if [ -z "$(find "$PWD" -maxdepth 1 -name "$ENV_FILENAME")" ]; then
 	echo "${PROGRAM_NAME}: ${ENV_FILENAME} is not in the PWD!"
@@ -20,6 +73,16 @@ fi
 
 if [ -z "$(which envsubst)" ]; then
 	echo "${PROGRAM_NAME}: envsubst cannot be found on the PATH!"
+	exit 1
+fi
+
+if [ -z "$(which dirname)" ]; then
+	echo "${PROGRAM_NAME}: dirname cannot be found on the PATH!"
+	exit 1
+fi
+
+if [ -z "$(which pathjoin)" ]; then
+	echo "${PROGRAM_NAME}: pathjoin cannot be found on the PATH!"
 	exit 1
 fi
 
@@ -50,13 +113,19 @@ walkdirtree () {
 # to the array. This sort of thing is 'rarely intended' 
 # according to shellcheck.
 # shellcheck disable=2145
-for f in $(walkdirtree "$PWD"); do
+# fp file_path
+for fp in $(walkdirtree "$PWD"); do
     # \..* for ignoring dotfiles
-    case "$f" in
+    case "$fp" in
         "${PWD}/${PROGRAM_NAME}")	;;
 		\..*)						;;
-        *)							envsubst "'${SUBST_VARS[@]}'" < "$f" > "$TEMP_FILENAME"
-									mv "$TEMP_FILENAME" "$f"
+        *)							ORIG_FILE_PATH=$(pathjoin "$(dirname "${fp}")" "${ORIG_PREFIX}$(basename "${fp}")");
+                                    # NOTE: its possible the original file was never moved over or 
+                                    # that it could have been deleted. Useful incase we wish to run PROGRAM_NAME
+                                    # again.
+                                    if ! [ -f "$ORIG_FILE_PATH" ]; then  mv "$fp" "$ORIG_FILE_PATH"; fi
+                                    if [ -n "$UNDO" ] && [ -f "$ORIG_FILE_PATH" ]; then mv "$ORIG_FILE_PATH" "$fp"; continue; fi
+                                    envsubst "'${SUBST_VARS[@]}'" < "$ORIG_FILE_PATH" > "$fp"
 									;;
     esac
 done
