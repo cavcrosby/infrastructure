@@ -122,9 +122,11 @@ for fp in $(walkdirtree "$PWD"); do
                                     # NOTE: its possible the original file was never moved over or 
                                     # that it could have been deleted. Useful incase we wish to run PROGRAM_NAME
                                     # again.
-                                    if ! [ -f "$ORIG_FILE_PATH" ]; then  mv "$fp" "$ORIG_FILE_PATH"; fi
+                                    if ! [ -f "$ORIG_FILE_PATH" ]; then mv "$fp" "$ORIG_FILE_PATH"; fi
                                     if [ -n "$UNDO" ] && [ -f "$ORIG_FILE_PATH" ]; then mv "$ORIG_FILE_PATH" "$fp"; continue; fi
                                     envsubst "'${SUBST_VARS[@]}'" < "$ORIG_FILE_PATH" > "$fp"
+                                    # assign same filemode permissions from the original file to the new copy
+                                    chmod "$(stat --format "%a" "$ORIG_FILE_PATH")" "$fp"
 									;;
     esac
 done
