@@ -1,5 +1,5 @@
 -jnlpUrl
-${JENKINS_MAIN_URL}/computer/${JENKINS_AGENT_NAME}/jenkins-agent.jnlp
+${JENKINS_MAIN_NODE_URL}/computer/${JENKINS_AGENT_NAME}/jenkins-agent.jnlp
 -jnlpCredentials
 ${JENKINS_USERNAME}:${JENKINS_PASSWORD}
 -workDir

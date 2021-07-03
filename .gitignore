@@ -1,0 +1,11 @@
+# repo specfic
+
+# normal files
+.conf
+*.jar
+
+# files generated formed from shtpls
+configs/*
+scripts/*
+!configs/*.shtpl
+!scripts/*.shtpl
