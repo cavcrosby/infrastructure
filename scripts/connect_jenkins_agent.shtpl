@@ -7,6 +7,8 @@ set -e
 # constants and defined cli parameters, opt ==> option
 PROGRAM_NAME="$(basename "$0")"
 readonly PROGRAM_NAME
+readonly FALSE=0
+readonly TRUE=1
 readonly HELP_SHORT_OPT="h"
 readonly HELP_LONG_OPT="help"
 readonly QUIET_SHORT_OPT="q"
@@ -27,8 +29,8 @@ readonly short_opts="${HELP_SHORT_OPT}"\
 "${QUIET_SHORT_OPT}"\
 "${AGENTOPTS_CFG_PATH_SHORT_OPT}"
 
-help_option=false
-quiet_option=false
+help_option="${FALSE}"
+quiet_option="${FALSE}"
 # do not combine long opts into their own variable
 eval set -- "$(getopt --options "${short_opts}" --long \
 "${HELP_LONG_OPT}",\
@@ -39,17 +41,15 @@ eval set -- "$(getopt --options "${short_opts}" --long \
 # cli ==> command line interface
 while true; do
     case "$1" in
-        "-${HELP_SHORT_OPT}" | "--${HELP_LONG_OPT}")                                help_option=true; shift ;;
-        "-${QUIET_SHORT_OPT}" | "--${QUIET_LONG_OPT}")                              quiet_option=true; shift ;;
+        "-${HELP_SHORT_OPT}" | "--${HELP_LONG_OPT}")                                help_option="${TRUE}"; shift ;;
+        "-${QUIET_SHORT_OPT}" | "--${QUIET_LONG_OPT}")                              quiet_option="${TRUE}"; shift ;;
         "-${AGENTOPTS_CFG_PATH_SHORT_OPT}" | "--${AGENTOPTS_CFG_PATH_LONG_OPT}")    agentopts_cfg_path="$2"; shift 2 ;;
         "--")                                                                       shift; break ;;
         *)                                                                          break ;;
     esac
 done
 
-# for reference on why just 'if [ $help_option ]; ...' is a bad idea:
-# https://stackoverflow.com/questions/2953646/how-can-i-declare-and-use-boolean-variables-in-a-shell-script#answer-21210966
-if [ "${help_option}" = true ]; then
+if (( help_option )); then
         cat << _EOF_
 Usage: ${PROGRAM_NAME} [-${HELP_SHORT_OPT}] [-${QUIET_SHORT_OPT}] [-${AGENTOPTS_CFG_PATH_SHORT_OPT} AGENTOPTS_CFG]
 
@@ -82,7 +82,7 @@ if [ -z "$(find "${PWD}" -maxdepth 1 -name "${AGENT_JAR}")" ]; then
 	fi
 fi
 
-if [ "${quiet_option}" = true ]; then
+if (( quiet_option )); then
     java -jar "${AGENT_JAR}" @"${agentopts_cfg_path}" > /dev/null 2>&1 &
 else
     java -jar "${AGENT_JAR}" @"${agentopts_cfg_path}" &
