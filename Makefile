@@ -51,7 +51,6 @@ export PROJECT_CONFIG_FILE
 # simply expanded variables
 project_configs_dir_path := ${CURDIR}/configs
 project_scripts_dir_path := ${CURDIR}/scripts
-# ext ==> extension, cfg ==> config, scrpt ==> script
 CFG_EXT := .cfg
 SHELL_TEMPLATE_EXT := .shtpl
 shell_template_wildcard := %${SHELL_TEMPLATE_EXT}
@@ -63,8 +62,8 @@ script_shell_templates := $(shell find ${project_scripts_dir_path} -name *${SHEL
 
 # Determines the cfg name(s) to be generated from the template(s).
 # Short hand notation for string substitution: $(text:pattern=replacement).
-cfgs := $(cfg_shell_templates:${cfg_shell_template_wildcard}=${cfg_wildcard})
-scrpts := $(script_shell_templates:${SHELL_TEMPLATE_EXT}=)
+_configs := $(cfg_shell_templates:${cfg_shell_template_wildcard}=${cfg_wildcard})
+_scripts := $(script_shell_templates:${SHELL_TEMPLATE_EXT}=)
 
 .PHONY: ${HELP}
 ${HELP}:
@@ -84,10 +83,10 @@ ${HELP}:
 ${ALL}: ${CONFIGS} ${SCRIPTS}
 
 .PHONY: ${CONFIGS}
-${CONFIGS}: ${cfgs}
+${CONFIGS}: ${_configs}
 
 .PHONY: ${SCRIPTS}
-${SCRIPTS}: ${scrpts}
+${SCRIPTS}: ${_scripts}
 
 ${PROJECT_CONFIG_FILE_NAME}:
 >	eval "$${PROJECT_CONFIG_FILE}" > "${CURDIR}/${PROJECT_CONFIG_FILE_NAME}"
@@ -106,4 +105,4 @@ ${project_scripts_dir_path}/%: ${project_scripts_dir_path}/${shell_template_wild
 .PHONY: ${CLEAN}
 ${CLEAN}:
 >	rm --force ${project_configs_dir_path}/*${CFG_EXT}
->	rm --force ${scrpts}
+>	rm --force ${_scripts}
