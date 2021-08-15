@@ -4,7 +4,7 @@
 .conf
 *.jar
 
-# files generated formed from shtpls
+# files generated from shtpls
 configs/*
 scripts/*
 !configs/*.shtpl
