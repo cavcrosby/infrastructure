@@ -65,18 +65,18 @@ _EOF_
 fi
 
 if [ -z "$(command -v java)" ]; then
-    echo "${PROGRAM_NAME}: java executable cannot be found in the PATH!"
+    echo "${PROGRAM_NAME}: java executable cannot be found in the PATH!" >&2
     exit 1
 fi
 
 if [ -z "$(command -v wget)" ]; then
-    echo "${PROGRAM_NAME}: wget cannot be found in the PATH!"
+    echo "${PROGRAM_NAME}: wget cannot be found in the PATH!" >&2
     exit 1
 fi
 
 if [ -z "$(find "${PWD}" -maxdepth 1 -name "${AGENT_JAR}")" ]; then
 	if ! wget --quiet --output-document "${AGENT_JAR}" "${JENKINS_MAIN_NODE_URL}/jnlpJars/${AGENT_JAR}"; then
-        echo "${PROGRAM_NAME}: could not find or get the agent executable: ${AGENT_JAR}"
+        echo "${PROGRAM_NAME}: could not find or get the agent executable: ${AGENT_JAR}" >&2
         exit 1
 	fi
 fi
