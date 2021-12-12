@@ -51,8 +51,8 @@ endef
 export PROJECT_CONFIG_FILE
 
 # simply expanded variables
-project_configs_dir_path := ${CURDIR}/configs
-project_scripts_dir_path := ${CURDIR}/scripts
+project_configs_dir_path := ./configs
+project_scripts_dir_path := ./scripts
 CONFIG_EXT := .cfg
 config_wildcard := %${CONFIG_EXT}
 SHELL_TEMPLATE_EXT := .shtpl
@@ -62,10 +62,10 @@ config_shell_template_wildcard := %${CONFIG_EXT}${SHELL_TEMPLATE_EXT}
 config_shell_templates := $(shell find ${project_configs_dir_path} -name *${config_shell_template_ext})
 script_shell_templates := $(shell find ${project_scripts_dir_path} -name *${SHELL_TEMPLATE_EXT})
 
-# Determines the config name(s) to be generated from the template(s).
+# Determines the config/script name(s) to be generated from the template(s).
 # Short hand notation for string substitution: $(text:pattern=replacement).
-configs := $(config_shell_templates:${config_shell_template_wildcard}=${config_wildcard})
-scripts := $(script_shell_templates:${SHELL_TEMPLATE_EXT}=)
+_configs := $(config_shell_templates:${config_shell_template_wildcard}=${config_wildcard})
+_scripts := $(script_shell_templates:${SHELL_TEMPLATE_EXT}=)
 
 .PHONY: ${HELP}
 ${HELP}:
@@ -73,8 +73,8 @@ ${HELP}:
 >	@echo 'Available make targets:'
 >	@echo '  ${ALL}              - generates all targets except ${PROJECT_CONFIG_FILE_NAME}'
 >	@echo '  ${PROJECT_CONFIG_FILE_NAME}            - generates the configuration file to be used by other'
->	@echo '                     make targets. Particularlly targets formed from shell'
->	@echo '                     templates.'
+>	@echo '                     make targets. Particularly targets formed from shell'
+>	@echo '                     templates'
 >	@echo '  ${CONFIGS}          - generates the configuration files to be used by the'
 >	@echo '                     entire project, depends on ${PROJECT_CONFIG_FILE_NAME} being filled in'
 >	@echo '  ${SCRIPTS}          - generates the scripts to be used from their templates'
@@ -82,29 +82,29 @@ ${HELP}:
 >	@echo '  ${CLEAN}            - removes files generated from other targets except ${PROJECT_CONFIG_FILE_NAME}'
 
 ${PROJECT_CONFIG_FILE_NAME}:
->	eval "$${PROJECT_CONFIG_FILE}" > "${CURDIR}/${PROJECT_CONFIG_FILE_NAME}"
+>	eval "$${PROJECT_CONFIG_FILE}" > "./${PROJECT_CONFIG_FILE_NAME}"
 
 .PHONY: ${ALL}
 ${ALL}: ${CONFIGS} ${SCRIPTS}
 
 .PHONY: ${CONFIGS}
-${CONFIGS}: ${configs}
+${CONFIGS}: ${_configs}
 
 .PHONY: ${SCRIPTS}
-${SCRIPTS}: ${scripts}
+${SCRIPTS}: ${_scripts}
 
 # custom implicit rules for the above targets
 ${project_configs_dir_path}/${config_wildcard}: ${project_configs_dir_path}/${config_shell_template_wildcard}
->	@[ -f "${CURDIR}/${PROJECT_CONFIG_FILE_NAME}" ] || { echo "${PROJECT_CONFIG_FILE_NAME} must be generated, run 'make ${PROJECT_CONFIG_FILE_NAME}'"; exit 1; }
->	. "${CURDIR}/${PROJECT_CONFIG_FILE_NAME}" && ${ENVSUBST} '${project_config_file_vars}' < "$<" > "$@"
+>	@[ -f "./${PROJECT_CONFIG_FILE_NAME}" ] || { echo "make: ${PROJECT_CONFIG_FILE_NAME} must be generated, run 'make ${PROJECT_CONFIG_FILE_NAME}'"; exit 1; }
+>	. "./${PROJECT_CONFIG_FILE_NAME}" && ${ENVSUBST} '${project_config_file_vars}' < "$<" > "$@"
 
 # All scripts at the moment are assumed to have no extension hence no wildcard var
 # on the target.
 ${project_scripts_dir_path}/%: ${project_scripts_dir_path}/${shell_template_wildcard}
->	@[ -f "${CURDIR}/${PROJECT_CONFIG_FILE_NAME}" ] || { echo "${PROJECT_CONFIG_FILE_NAME} must be generated, run 'make ${PROJECT_CONFIG_FILE_NAME}'"; exit 1; }
->	. "${CURDIR}/${PROJECT_CONFIG_FILE_NAME}" && ${ENVSUBST} '${project_config_file_vars}' < "$<" > "$@"
+>	@[ -f "./${PROJECT_CONFIG_FILE_NAME}" ] || { echo "make: ${PROJECT_CONFIG_FILE_NAME} must be generated, run 'make ${PROJECT_CONFIG_FILE_NAME}'"; exit 1; }
+>	. "./${PROJECT_CONFIG_FILE_NAME}" && ${ENVSUBST} '${project_config_file_vars}' < "$<" > "$@"
 
 .PHONY: ${CLEAN}
 ${CLEAN}:
 >	rm --force ${project_configs_dir_path}/*${CONFIG_EXT}
->	rm --force ${scripts}
+>	rm --force ${_scripts}
