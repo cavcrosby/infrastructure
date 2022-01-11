@@ -38,6 +38,8 @@ eval set -- "$(getopt --options "${short_opts}" --long \
 "${QUIET_LONG_OPT}" --name "${PROGRAM_NAME}" -- "$@")"
 
 # determine behavior of program from cli arguments
+# TODO(cavcrosby): its possible that alternative agentopts_cfg_path is never
+# actually retrieved from its option.
 while true; do
     case "$1" in
         "-${HELP_SHORT_OPT}" | "--${HELP_LONG_OPT}")                                help_option="${TRUE}"; shift ;;
